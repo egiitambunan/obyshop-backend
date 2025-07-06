@@ -6,65 +6,73 @@ const fs = require("fs");
 
 const app = express();
 
-// Load environment variables jika bukan production
+// ✅ Load environment variables (.env) hanya saat development
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
 console.log("🔥 MONGO_URI:", process.env.MONGO_URI);
 
-// === CORS SETUP ===
+// ✅ CORS agar Public & Admin bisa connect ke Backend
 const allowedOrigins = [
-  "https://obyshop.netlify.app",          // Website Public
-  "https://adminobyshop.netlify.app",     // Dashboard Admin
+  "https://obyshop.netlify.app",           // Website public
+  "https://adminobyshop.netlify.app",      // Admin Dashboard
+  "http://localhost:3000",                 // (Opsional) Dev Local
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS Not Allowed: " + origin));
+    }
+  },
+  credentials: true,
 }));
 
+// ✅ Middleware body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// === Static Files ===
+// ✅ Static Files (gambar, video)
 global.__basedir = __dirname;
 const uploadPath = path.join(__dirname, "uploads/videos");
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });
 }
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// === Logger sederhana (opsional) ===
+// ✅ Logger Sederhana (opsional)
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-// === Routes ===
+// ✅ Routes
 app.get("/", (req, res) => {
-  res.send("🚀 ObyShop backend is running");
+  res.send("🚀 ObyShop Backend is Running");
 });
 
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/products", require("./routes/products"));
-app.use("/api/content", require("./routes/content"));
-app.use("/api/upload", require("./routes/upload"));
+app.use("/api/auth", require("./routes/auth"));         // Login Admin
+app.use("/api/products", require("./routes/products")); // Produk
+app.use("/api/content", require("./routes/content"));   // Konten
+app.use("/api/upload", require("./routes/upload"));     // Upload Gambar/Video
 
-// === Connect MongoDB dan Start Server ===
+// ✅ MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("✅ MongoDB connected successfully");
+    console.log("✅ MongoDB Connected");
+
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🚀 Server running at PORT ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    console.error("❌ MongoDB Connection Failed:", err.message);
   });
