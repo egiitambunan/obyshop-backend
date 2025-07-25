@@ -35,13 +35,20 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Static Files (gambar, video)
-global.__basedir = __dirname;
-const uploadPath = path.join(__dirname, "uploads/videos");
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
+// ✅ Pastikan folder 'uploads/videos' otomatis dibuat jika belum ada
+const uploadsDir = path.join(__dirname, "uploads");
+const videosDir = path.join(uploadsDir, "videos");
+
+// Buat folder uploads dan videos jika belum ada
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
 }
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+if (!fs.existsSync(videosDir)) {
+  fs.mkdirSync(videosDir);
+}
+
+// ✅ Semua file di /uploads (gambar, video) bisa diakses publik
+app.use("/uploads", express.static(uploadsDir));
 
 // ✅ Logger Sederhana (opsional)
 app.use((req, res, next) => {
