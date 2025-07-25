@@ -35,24 +35,17 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Pastikan folder 'uploads/videos' otomatis dibuat jika belum ada
-const uploadsDir = path.join(__dirname, "uploads");
-const videosDir = path.join(uploadsDir, "videos");
-
-// Buat folder uploads dan videos jika belum ada
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
+// ✅ Static Files (gambar, video)
+global.__basedir = __dirname;
+const uploadPath = path.join(__dirname, "uploads/videos");
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
 }
-if (!fs.existsSync(videosDir)) {
-  fs.mkdirSync(videosDir);
-}
-
-// ✅ Semua file di /uploads (gambar, video) bisa diakses publik
-app.use("/uploads", express.static(uploadsDir));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ Logger Sederhana (opsional)
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log([${new Date().toISOString()}] ${req.method} ${req.url});
   next();
 });
 
@@ -77,7 +70,7 @@ mongoose
 
     const PORT = process.env.PORT || 8080;
     app.listen(PORT, () => {
-      console.log(`🚀 Server running at PORT ${PORT}`);
+      console.log(🚀 Server running at PORT ${PORT});
     });
   })
   .catch((err) => {
