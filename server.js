@@ -43,9 +43,9 @@ if (!fs.existsSync(uploadPath)) {
 }
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ✅ Logger Sederhana (opsional)
+// ✅ Logger Sederhana
 app.use((req, res, next) => {
-  console.log([${new Date().toISOString()}] ${req.method} ${req.url});
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
@@ -70,7 +70,7 @@ mongoose
 
     const PORT = process.env.PORT || 8080;
     app.listen(PORT, () => {
-      console.log(🚀 Server running at PORT ${PORT});
+      console.log(`🚀 Server running at PORT ${PORT}`);
     });
   })
   .catch((err) => {
