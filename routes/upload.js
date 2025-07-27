@@ -76,5 +76,26 @@ router.post("/video", videoUpload.single("video"), async (req, res) => {
     res.status(500).json({ error: "Gagal upload video" });
   }
 });
+// ✅ Upload gambar dengan field 'image' (untuk wallpaper hero)
+router.post("/image", upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Gagal upload gambar" });
+
+  const imagePath = `/uploads/${req.file.filename}`;
+
+  try {
+    let content = await Content.findOne();
+    if (!content) content = new Content();
+
+    // Simpan path gambar ke field heroBackgroundImage
+    content.heroBackgroundImage = imagePath;
+
+    await content.save();
+
+    res.json({ imageUrl: imagePath });
+  } catch (err) {
+    console.error("❌ Gagal simpan gambar:", err);
+    res.status(500).json({ error: "Gagal menyimpan gambar ke database" });
+  }
+});
 
 module.exports = router;
